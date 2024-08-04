@@ -1,3 +1,11 @@
 #!/bin/bash
 
-/mnt/disks/apps/duplicati/scripts/duc list backups | fgrep $1 | sed "s/^- //g" | sed "s/:$//"
+if [[ $# == 0 ]]; then
+    printf "[ERROR] usage: get-backup-name <filesystem>\n"
+    exit 1
+fi
+
+# Absolute path this script is in
+SCRIPT_DIR=$(dirname $(readlink -f "$0"))
+
+$SCRIPT_DIR/duc list backups | fgrep $1 | sed "s/^- //g" | sed "s/:$//"
