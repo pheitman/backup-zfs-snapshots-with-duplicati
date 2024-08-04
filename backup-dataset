@@ -1,0 +1,32 @@
+#!/bin/bash
+
+if [[ $# == 0 ]]; then
+    printf "[ERROR] usage: backup-dataset <filesystem> [<filesystem>]...\n"
+    exit 1
+fi
+
+# Absolute path this script is in
+SCRIPT_DIR=$(dirname $(readlink -f "$0"))
+
+for ZFS_FILESYSTEM_NAME in "$@"
+do
+    source $SCRIPT_DIR/backup-dataset.env
+    
+    printf "\n[INFO] Starting backup for datastore $ZFS_POOL_NAME/$ZFS_FILESYSTEM_NAME\n"
+
+    DUPLICATI_BACKUP_JOB_NAME=`$SCRIPT_DIR/get-backup-name $ZFS_FILESYSTEM_NAME`
+
+    DUPLICATI_BACKUP_JOB_ID=`$SCRIPT_DIR/get-backup-id $ZFS_FILESYSTEM_NAME`
+
+    if [[ -z "$DUPLICATI_BACKUP_JOB_ID" ]]; then
+        printf "[ERROR] unknown duplicati backup job for $ZFS_FILESYSTEM_NAME\n"
+        exit 1
+    fi
+
+    $SCRIPT_DIR/create-and-mount-dataset-snapshot $ZFS_FILESYSTEM_NAME
+    echo "[INFO] running backup job $DUPLICATI_BACKUP_JOB_NAME (ID $DUPLICATI_BACKUP_JOB_ID)"
+    $SCRIPT_DIR/duc run $DUPLICATI_BACKUP_JOB_ID
+done
+
+exit 0
+

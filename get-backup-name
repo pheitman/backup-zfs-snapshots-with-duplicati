@@ -1,0 +1,3 @@
+#!/bin/bash
+
+/mnt/disks/apps/duplicati/scripts/duc list backups | fgrep $1 | sed "s/^- //g" | sed "s/:$//"

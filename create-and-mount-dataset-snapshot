@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+if [[ $# != 1 ]]; then
+    printf "[ERROR] usage: create-and-mount-dataset-snapshot <dataset>"
+    exit 1
+fi
+
+ZFS_FILESYSTEM_NAME="$1"
+
+# Absolute path this script is in
+SCRIPT_DIR=$(dirname $(readlink -f "$0"))
+
+source $SCRIPT_DIR/backup-dataset.env
+
+ls $ZFS_SNAPSHOT_MOUNT 1>/dev/null 2>/dev/null
+
+if [[ $? == 2 ]]; then
+    mkdir -p $ZFS_SNAPSHOT_MOUNT
+fi
+
+if [[ -z "$(zfs list | grep $ZFS_DATASET_NAME)" ]]; then
+    printf "[ERROR] The ZFS dataset $ZFS_DATASET_NAME does not exist\n"
+    exit 1
+fi
+
+$SCRIPT_DIR/umount-and-delete-dataset-snapshot $ZFS_FILESYSTEM_NAME
+
+if [[ ! -z "$(ls -A $ZFS_SNAPSHOT_MOUNT)" ]]; then
+    printf "[ERROR] The backup mount directory, $ZFS_SNAPSHOT_MOUNT is not empty\n"
+    exit 1
+fi
+
+zfs snapshot -r "$ZFS_SNAPSHOT_NAME"
+mount -t zfs "$ZFS_SNAPSHOT_NAME" "$ZFS_SNAPSHOT_MOUNT"
+
+if [[ -z "$(ls -A $ZFS_SNAPSHOT_MOUNT)" ]]; then
+    printf "[ERROR] Snapshot was created but failed to mount. (empty directory)\n"
+    exit 1
+fi
+
+printf "[INFO] Snapshot $ZFS_SNAPSHOT_NAME was created and mounted at $ZFS_SNAPSHOT_MOUNT. Ready for duplicati.\n"
+
+exit 0
+
