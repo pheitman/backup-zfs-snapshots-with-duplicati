@@ -3,6 +3,11 @@
 # Absolute path this script is in
 SCRIPT_DIR=$(dirname $(readlink -f "$0"))
 
+if [ ! -x $SCRIPT_DIR/duplicati_client ]; then
+    printf "[ERROR] duplicati_client not found. Download it from https://github.com/Pectojin/duplicati-client/releases/download/0.6.5_beta/duplicati_client_0.6.5_gnu_linux.zip and put duplicati_client in directory $SCRIPT_DIR"
+    exit 1
+fi
+    
 export TMPDIR=$SCRIPT_DIR/tmp
 
 mkdir -p $TMPDIR
