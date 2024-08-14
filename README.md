@@ -55,7 +55,7 @@ Do this for each backup job/dataset
 
 Once you have verified that all of the backup jobs are working correctly, create a cron job that invokes the script on all of the datasets to be backed up, e.g.
 
-15 2 * * *    <full path to scripts>/backup-dataset <dataset1> <dataset2>
+    15 2 * * *    <full path to scripts>/backup-dataset <dataset1> <dataset2>
 
 ...
 
