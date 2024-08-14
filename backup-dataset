@@ -8,6 +8,11 @@ fi
 # Absolute path this script is in
 SCRIPT_DIR=$(dirname $(readlink -f "$0"))
 
+if $($SCRIPT_DIR/duc status | fgrep "Not logged in" >/dev/null); then
+    printf "[ERROR] Not logged in - you need to log in to the duplicati server\n      $SCRIPT_DIR/duc login <duplicati server>\n"
+    exit 1
+fi
+
 for ZFS_FILESYSTEM_NAME in "$@"
 do
     source $SCRIPT_DIR/backup-dataset.env
