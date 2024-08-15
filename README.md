@@ -57,5 +57,26 @@ Once you have verified that all of the backup jobs are working correctly, create
 
     15 2 * * *    <full path to scripts>/backup-dataset <dataset1> <dataset2>
 
+Examples from my use case:
+
+I have my pool mounted at /mnt/disks. I want to backup a snapshot of the filesystem /mnt/disk/apps
+
+First, edit ./backup-dataset.env to make sure that the ZFS_POOL_DIR points to the pool (in my case to /mnt/disks)
+
+I create a backup job named 'IDrive e2 - zfs- apps'
+The key thing here is that "apps" is included in the name of the job. This is so that the scripts can find the job associated with the dataset.
+
+The source for the backup job is /mnt/snaps/apps
+The snapshot taken before the job is run will be mounted at /mnt/snaps/apps. Before creating the job, I run './create-and-mount-dataset-snapshot apps' so that the directory /mnt/snaps/apps is created and I can target it as the source of the job
+
+I then run the backup job from the duplicati gui once to make sure that it is set up correctly.
+Then I run './backup-dataset apps' which will unmount the previous snapshot, delete the previous snapshot, create a new snapshot and mount it at /mnt/snaps/apps. It will then start the backup job that includes the name of the dataset 'apps'
+
+Then I do the same for the other datasets that I want to back up
+
+When I have verified that everything is working correcty, I set up a cron job for the root user to run <full path>/backup-dataset apps \<second dataset\> \<third dataset\> ...
+
+One additional suggestion. I have email confirmations set up in duplicati so that I get an email every time a backup has finished - whether it succeeds or fails. That way I know that the cron job ran correctly every night.
+
 ...
 
